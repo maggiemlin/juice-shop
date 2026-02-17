@@ -1,0 +1,36 @@
+name: "GitHub Security Scan"
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+  workflow_dispatch: # allow user to manually click button to trigger scan
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          # exclude the test cde and the 3rd party libraries from scannig
+          config: |
+            paths-ignore:
+              - 'test/**'
+              - 'spec/**'
+              - 'node_modules/**'
+              - 'frontend/src/assets/**'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
